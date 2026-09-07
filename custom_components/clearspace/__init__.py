@@ -39,7 +39,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     api = ClearSpaceApi(async_get_clientsession(hass), entry.data[CONF_API_URL], entry.data[CONF_API_TOKEN])
     coordinator = ClearSpaceCoordinator(hass, api)
     await coordinator.async_config_entry_first_refresh()
-    entry.runtime_data = coordinator
+    
+    if DOMAIN not in hass.data:
+        hass.data[DOMAIN] = {}
+    hass.data[DOMAIN][entry.entry_id] = coordinator
+    
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     async def create_task(call: ServiceCall) -> None:
