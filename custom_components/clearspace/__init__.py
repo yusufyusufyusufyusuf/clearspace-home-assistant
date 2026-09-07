@@ -11,7 +11,7 @@ import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant, ServiceCall
-from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
+from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
@@ -71,11 +71,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     try:
         await coordinator.async_config_entry_first_refresh()
     except ConfigEntryAuthFailed:
-        _LOGGER.error("ClearSpace authentication failed")
-        raise
+        _LOGGER.error("ClearSpace authentication failed; creating entities with empty data")
+        coordinator.data = {"tasks": [], "spaces": []}
     except Exception as err:
-        _LOGGER.error("ClearSpace setup failed: %s", err)
-        raise ConfigEntryNotReady from err
+        _LOGGER.error("ClearSpace initial refresh failed: %s; creating entities with empty data", err)
+        coordinator.data = {"tasks": [], "spaces": []}
     
     hass.data[DOMAIN][entry.entry_id] = coordinator
     _LOGGER.debug("ClearSpace coordinator stored for entry %s", entry.entry_id)
