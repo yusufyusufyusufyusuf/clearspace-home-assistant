@@ -58,13 +58,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     _LOGGER.debug("Entry data keys: %s", list(entry.data.keys()) if entry.data else "None")
     
     if not entry.data:
-        _LOGGER.error("ClearSpace config entry has no data")
-        return False
+        _LOGGER.warning("ClearSpace config entry has no data; using defaults and empty state")
+        entry_data = {}
+    else:
+        entry_data = entry.data
     
     api = ClearSpaceApi(
         async_get_clientsession(hass),
-        entry.data[CONF_API_URL],
-        entry.data[CONF_API_TOKEN],
+        entry_data.get(CONF_API_URL, "https://clearspace-billing.yusuf-145.workers.dev"),
+        entry_data.get(CONF_API_TOKEN, ""),
     )
     coordinator = ClearSpaceCoordinator(hass, api)
     
