@@ -84,6 +84,23 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             if task.get("status") != "done" and bool(task.get("due")) and task["due"] < today
         )
 
+        common_attrs = {
+            "tasks": tasks,
+            "open_tasks": open_count,
+            "due_today_tasks": due_today_count,
+            "overdue_tasks": overdue_count,
+            "unit_of_measurement": "tasks",
+            "icon": "mdi:checkbox-marked-circle-outline",
+        }
+
+        hass.states.async_set(
+            "sensor.clearspace_tasks",
+            open_count,
+            {
+                **common_attrs,
+                "friendly_name": "ClearSpace Tasks",
+            },
+        )
         hass.states.async_set(
             "sensor.clearspace_open",
             open_count,
@@ -114,7 +131,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 "tasks": tasks,
             },
         )
-
     try:
         await coordinator.async_config_entry_first_refresh()
     except ConfigEntryAuthFailed:
