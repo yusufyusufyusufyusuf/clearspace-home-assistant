@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any
 import logging
 
@@ -89,6 +89,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             "open_tasks": open_count,
             "due_today_tasks": due_today_count,
             "overdue_tasks": overdue_count,
+            "last_synced": datetime.now(timezone.utc).isoformat(),
             "unit_of_measurement": "tasks",
             "icon": "mdi:checkbox-marked-circle-outline",
         }
@@ -191,6 +192,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         "delete_task",
         delete_task,
         schema=vol.Schema({vol.Required("task_id"): cv.string}),
+    )
+    hass.services.async_register(
+        DOMAIN,
+        "refresh",
+        lambda call: coordinator.async_request_refresh(),
     )
     return True
 
