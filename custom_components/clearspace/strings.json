@@ -3,11 +3,14 @@
     "step": {
       "user": {
         "title": "Connect ClearSpace",
-        "description": "Create a Home Assistant API token in ClearSpace Settings, then paste it here.",
+        "description": "Create a ClearSpace API token in settings, then connect one account per token. You can add more later.",
         "data": {
           "name": "Account name",
           "api_token": "API token",
-          "api_url": "API URL"
+          "api_url": "API URL",
+          "entity_prefix": "Entity prefix",
+          "refresh_interval": "Refresh interval (seconds)",
+          "is_default": "Use as default account for services"
         }
       }
     },
@@ -16,7 +19,20 @@
       "invalid_auth": "The API token is invalid or revoked"
     },
     "abort": {
-      "already_configured": "ClearSpace is already configured"
+      "already_configured": "This API token is already configured"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "ClearSpace account settings",
+        "description": "Change the entity prefix, refresh interval, or which account is the default target for services.",
+        "data": {
+          "entity_prefix": "Entity prefix",
+          "refresh_interval": "Refresh interval (seconds)",
+          "is_default": "Use as default account for services"
+        }
+      }
     }
   }
 }

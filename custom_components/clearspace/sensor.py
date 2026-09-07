@@ -12,6 +12,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN
+from .helpers import entry_settings
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -21,20 +22,19 @@ async def async_setup_entry(
 ) -> None:
     """Set up ClearSpace sensors."""
     _LOGGER.info("Setting up ClearSpace sensors for entry %s", entry.entry_id)
-    
-    coordinator = hass.data.get(DOMAIN, {}).get(entry.entry_id)
+
+    coordinator = hass.data.get(DOMAIN, {}).get("entries", {}).get(entry.entry_id, {}).get("coordinator")
     if coordinator is None:
         _LOGGER.error("ClearSpace coordinator not found for entry %s", entry.entry_id)
         return
-    
-    entities = [
-        ClearSpaceTaskSensor(coordinator, entry, "open"),
-        ClearSpaceTaskSensor(coordinator, entry, "due_today"),
-        ClearSpaceTaskSensor(coordinator, entry, "overdue"),
-    ]
-    
-    _LOGGER.info("Adding %d ClearSpace sensors", len(entities))
-    async_add_entities(entities)
+
+    async_add_entities(
+        [
+            ClearSpaceTaskSensor(coordinator, entry, "open"),
+            ClearSpaceTaskSensor(coordinator, entry, "due_today"),
+            ClearSpaceTaskSensor(coordinator, entry, "overdue"),
+        ]
+    )
 
 
 class ClearSpaceTaskSensor(CoordinatorEntity, SensorEntity):
@@ -46,16 +46,17 @@ class ClearSpaceTaskSensor(CoordinatorEntity, SensorEntity):
     def __init__(self, coordinator, entry: ConfigEntry, kind: str) -> None:
         super().__init__(coordinator)
         self._kind = kind
-        self._entry_id = entry.entry_id
+        self._entry = entry
+        self._settings = entry_settings(entry)
         self._attr_unique_id = f"{entry.entry_id}_{kind}"
-        self._attr_name = kind.replace("_", " ").title()
+        self._attr_name = f"{self._settings['name']} {kind.replace('_', ' ').title()}"
         _LOGGER.debug("Created ClearSpace sensor: %s (%s)", self._attr_unique_id, kind)
 
     @property
     def device_info(self):
         return {
-            "identifiers": {(DOMAIN, self._entry_id)},
-            "name": "ClearSpace",
+            "identifiers": {(DOMAIN, self._entry.entry_id)},
+            "name": self._settings["name"],
             "manufacturer": "ClearSpace",
             "model": "Task Manager",
         }

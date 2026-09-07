@@ -2,6 +2,16 @@ create_task:
   name: Create task
   description: Create a task in ClearSpace.
   fields:
+    entry_id:
+      name: Config entry ID
+      description: Optional. Target a specific ClearSpace account.
+      selector:
+        text:
+    entity_prefix:
+      name: Entity prefix
+      description: Optional. Target the account with this prefix.
+      selector:
+        text:
     name:
       name: Name
       required: true
@@ -30,6 +40,16 @@ complete_task:
   name: Complete task
   description: Mark a ClearSpace task as done.
   fields:
+    entry_id:
+      name: Config entry ID
+      description: Optional. Target a specific ClearSpace account.
+      selector:
+        text:
+    entity_prefix:
+      name: Entity prefix
+      description: Optional. Target the account with this prefix.
+      selector:
+        text:
     task_id:
       name: Task ID
       required: true
@@ -39,8 +59,32 @@ delete_task:
   name: Delete task
   description: Permanently delete a ClearSpace task.
   fields:
+    entry_id:
+      name: Config entry ID
+      description: Optional. Target a specific ClearSpace account.
+      selector:
+        text:
+    entity_prefix:
+      name: Entity prefix
+      description: Optional. Target the account with this prefix.
+      selector:
+        text:
     task_id:
       name: Task ID
       required: true
+      selector:
+        text:
+refresh:
+  name: Refresh
+  description: Refresh data from ClearSpace now.
+  fields:
+    entry_id:
+      name: Config entry ID
+      description: Optional. Target a specific ClearSpace account.
+      selector:
+        text:
+    entity_prefix:
+      name: Entity prefix
+      description: Optional. Target the account with this prefix.
       selector:
         text:
