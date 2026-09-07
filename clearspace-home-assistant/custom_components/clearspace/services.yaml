@@ -1,0 +1,46 @@
+create_task:
+  name: Create task
+  description: Create a task in ClearSpace.
+  fields:
+    name:
+      name: Name
+      required: true
+      selector:
+        text:
+    due:
+      name: Due date
+      selector:
+        date:
+    priority:
+      name: Priority
+      default: medium
+      selector:
+        select:
+          options: [low, medium, high, urgent]
+    space_id:
+      name: Space ID
+      selector:
+        text:
+    description:
+      name: Description
+      selector:
+        text:
+          multiline: true
+complete_task:
+  name: Complete task
+  description: Mark a ClearSpace task as done.
+  fields:
+    task_id:
+      name: Task ID
+      required: true
+      selector:
+        text:
+delete_task:
+  name: Delete task
+  description: Permanently delete a ClearSpace task.
+  fields:
+    task_id:
+      name: Task ID
+      required: true
+      selector:
+        text:

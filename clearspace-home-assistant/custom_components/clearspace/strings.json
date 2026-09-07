@@ -1,0 +1,22 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect ClearSpace",
+        "description": "Create a Home Assistant API token in ClearSpace Settings, then paste it here.",
+        "data": {
+          "name": "Account name",
+          "api_token": "API token",
+          "api_url": "API URL"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not connect to ClearSpace",
+      "invalid_auth": "The API token is invalid or revoked"
+    },
+    "abort": {
+      "already_configured": "ClearSpace is already configured"
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "domain": "clearspace",
+  "name": "ClearSpace",
+  "codeowners": [],
+  "config_flow": true,
+  "documentation": "https://clearspacetask.com/integrations/home-assistant",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "requirements": [],
+  "version": "1.0.0"
+}
