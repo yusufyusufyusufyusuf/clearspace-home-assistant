@@ -56,20 +56,65 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up ClearSpace from a config entry."""
     _LOGGER.debug("Setting up ClearSpace entry %s", entry.entry_id)
     _LOGGER.debug("Entry data keys: %s", list(entry.data.keys()) if entry.data else "None")
-    
+
     if not entry.data:
         _LOGGER.warning("ClearSpace config entry has no data; using defaults and empty state")
         entry_data = {}
     else:
         entry_data = entry.data
-    
+
     api = ClearSpaceApi(
         async_get_clientsession(hass),
         entry_data.get(CONF_API_URL, "https://clearspace-billing.yusuf-145.workers.dev"),
         entry_data.get(CONF_API_TOKEN, ""),
     )
     coordinator = ClearSpaceCoordinator(hass, api)
-    
+
+    async def async_update_virtual_sensors() -> None:
+        data = coordinator.data or {"tasks": [], "spaces": []}
+        tasks = data.get("tasks", []) or []
+        from datetime import date as _date
+
+        today = _date.today().isoformat()
+        open_count = sum(1 for task in tasks if task.get("status") != "done")
+        due_today_count = sum(1 for task in tasks if task.get("status") != "done" and task.get("due") == today)
+        overdue_count = sum(
+            1
+            for task in tasks
+            if task.get("status") != "done" and bool(task.get("due")) and task["due"] < today
+        )
+
+        hass.states.async_set(
+            "sensor.clearspace_open",
+            open_count,
+            {
+                "friendly_name": "Open Tasks",
+                "unit_of_measurement": "tasks",
+                "icon": "mdi:checkbox-marked-circle-outline",
+                "tasks": tasks,
+            },
+        )
+        hass.states.async_set(
+            "sensor.clearspace_due_today",
+            due_today_count,
+            {
+                "friendly_name": "Due Today",
+                "unit_of_measurement": "tasks",
+                "icon": "mdi:calendar-today",
+                "tasks": tasks,
+            },
+        )
+        hass.states.async_set(
+            "sensor.clearspace_overdue",
+            overdue_count,
+            {
+                "friendly_name": "Overdue",
+                "unit_of_measurement": "tasks",
+                "icon": "mdi:alert-circle",
+                "tasks": tasks,
+            },
+        )
+
     try:
         await coordinator.async_config_entry_first_refresh()
     except ConfigEntryAuthFailed:
@@ -78,10 +123,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     except Exception as err:
         _LOGGER.error("ClearSpace initial refresh failed: %s; creating entities with empty data", err)
         coordinator.data = {"tasks": [], "spaces": []}
-    
+
+    await async_update_virtual_sensors()
+    coordinator.async_add_listener(lambda: hass.async_create_task(async_update_virtual_sensors()))
+
     hass.data[DOMAIN][entry.entry_id] = coordinator
     _LOGGER.debug("ClearSpace coordinator stored for entry %s", entry.entry_id)
-    
+
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     _LOGGER.debug("ClearSpace platforms setup complete for entry %s", entry.entry_id)
 
