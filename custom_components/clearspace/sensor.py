@@ -31,7 +31,18 @@ class ClearSpaceTaskSensor(CoordinatorEntity, SensorEntity):
         self._attr_name = kind.replace("_", " ").title()
 
     @property
-    def native_value(self) -> int:
+    def device_info(self):
+        return {
+            "identifiers": {(DOMAIN, self.coordinator.config_entry.entry_id)},
+            "name": "ClearSpace",
+            "manufacturer": "ClearSpace",
+            "model": "Task Manager",
+        }
+
+    @property
+    def native_value(self) -> int | None:
+        if self.coordinator.data is None:
+            return None
         tasks = self.coordinator.data.get("tasks", [])
         today = date.today().isoformat()
         if self._kind == "open":
